@@ -1,0 +1,18 @@
+# Python dependencies for SAP Finance Fine-Tuned Model examples
+#
+# Install with: pip install -r requirements.txt
+#
+# These packages are needed for:
+# - Testing the fine-tuned model
+# - Validating training datasets
+# - Integration examples
+
+# Azure OpenAI SDK
+openai>=1.0.0
+
+# Optional: For enhanced functionality
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Optional: For data validation and analysis
+jsonschema>=4.19.0
