@@ -12,6 +12,10 @@ import json
 import os
 from pathlib import Path
 
+# Constants for token and cost estimation
+CHARS_PER_TOKEN_ESTIMATE = 4  # Rough approximation: 1 token ≈ 4 characters
+COST_PER_1K_TRAINING_TOKENS = 0.008  # Azure OpenAI fine-tuning cost estimate (subject to change)
+
 
 def validate_jsonl_file(file_path):
     """
@@ -110,8 +114,9 @@ def validate_jsonl_file(file_path):
                         elif role == "assistant":
                             has_assistant = True
                         
-                        # Estimate tokens (rough: 1 token ≈ 4 characters)
-                        stats["total_tokens_estimate"] += len(content) // 4
+                        # Estimate tokens using rough approximation
+                        # Note: This is a simplified estimate. Actual tokenization depends on the model's tokenizer.
+                        stats["total_tokens_estimate"] += len(content) // CHARS_PER_TOKEN_ESTIMATE
                     
                     # Check conversation structure
                     if not has_user:
@@ -238,8 +243,8 @@ def validate_all_datasets():
     
     print("\n" + "="*80 + "\n")
     
-    # Cost estimate
-    estimated_cost = (total_stats["total_tokens"] / 1000) * 0.008  # Rough estimate
+    # Cost estimate based on Azure OpenAI training token pricing
+    estimated_cost = (total_stats["total_tokens"] / 1000) * COST_PER_1K_TRAINING_TOKENS
     print(f"💰 Estimated fine-tuning cost: ${estimated_cost:.2f} - ${estimated_cost * 2:.2f}")
     print("   (Actual cost depends on epochs, batch size, and Azure pricing)")
     print("\n" + "="*80 + "\n")
