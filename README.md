@@ -8,6 +8,7 @@
 
 - [Executive Summary](#executive-summary)
 - [Business Problem & Solution](#business-problem--solution)
+- [Fine-Tuning Workflow Overview](#fine-tuning-workflow-overview)
 - [Prerequisites](#prerequisites)
 - [Step-by-Step Demo Guide](#step-by-step-demo-guide)
 - [Understanding LoRA Fine-Tuning](#understanding-lora-fine-tuning)
@@ -16,6 +17,7 @@
 - [Cost Estimates](#cost-estimates)
 - [Best Practices](#best-practices)
 - [Files Included](#files-included)
+- [References & Resources](#references--resources)
 
 ---
 
@@ -41,6 +43,410 @@ A fine-tuned model that:
 - Explains GL account structures and posting logic
 - Assists with month-end close procedures
 - Responds in SAP-native terminology customers expect
+
+---
+
+## Fine-Tuning Workflow Overview
+
+### Complete End-to-End Process Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    AZURE AI FOUNDRY FINE-TUNING WORKFLOW                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────┐
+│  PHASE 1         │
+│  Data            │──────┐
+│  Preparation     │      │
+└──────────────────┘      │
+                          ▼
+         ┌────────────────────────────────┐
+         │ • Collect SAP Finance Q&A      │
+         │ • Format as JSONL files        │
+         │ • Training: 50+ examples       │
+         │ • Validation: 10+ examples     │
+         └────────────────────────────────┘
+                          │
+                          ▼
+┌──────────────────┐
+│  PHASE 2         │
+│  Environment     │──────┐
+│  Setup           │      │
+└──────────────────┘      │
+                          ▼
+         ┌────────────────────────────────┐
+         │ • Create Azure AI Hub          │
+         │ • Create Project               │
+         │ • Verify Region Support        │
+         │ • Assign Azure AI User Role    │
+         └────────────────────────────────┘
+                          │
+                          ▼
+┌──────────────────┐
+│  PHASE 3         │
+│  Model           │──────┐
+│  Selection       │      │
+└──────────────────┘      │
+                          ▼
+         ┌────────────────────────────────┐
+         │ • Choose Base Model            │
+         │ • GPT-4o-mini-2024-07-18       │
+         │ • Select Training Method       │
+         │ • LoRA (SFT)                   │
+         └────────────────────────────────┘
+                          │
+                          ▼
+┌──────────────────┐
+│  PHASE 4         │
+│  Upload &        │──────┐
+│  Configure       │      │
+└──────────────────┘      │
+                          ▼
+         ┌────────────────────────────────┐
+         │ • Upload Training Data         │
+         │ • Upload Validation Data       │
+         │ • Configure Hyperparameters    │
+         │   - Epochs: 3-5                │
+         │   - Learning Rate: Auto        │
+         │   - Batch Size: Auto           │
+         └────────────────────────────────┘
+                          │
+                          ▼
+┌──────────────────┐
+│  PHASE 5         │
+│  Training &      │──────┐
+│  Monitoring      │      │
+└──────────────────┘      │
+                          ▼
+         ┌────────────────────────────────┐
+         │ • Start Fine-Tuning Job        │
+         │ • Monitor Training Loss        │
+         │ • Check Validation Loss        │
+         │ • Duration: 15-45 minutes      │
+         │                                │
+         │    Status Progression:         │
+         │    Pending → Running →         │
+         │    Succeeded                   │
+         └────────────────────────────────┘
+                          │
+                          ▼
+┌──────────────────┐
+│  PHASE 6         │
+│  Deployment      │──────┐
+└──────────────────┘      │
+                          ▼
+         ┌────────────────────────────────┐
+         │ • Deploy Fine-Tuned Model      │
+         │ • Configure Endpoint           │
+         │ • Set Capacity (TPM)           │
+         │ • Enable Auto-Scaling          │
+         └────────────────────────────────┘
+                          │
+                          ▼
+┌──────────────────┐
+│  PHASE 7         │
+│  Testing &       │──────┐
+│  Validation      │      │
+└──────────────────┘      │
+                          ▼
+         ┌────────────────────────────────┐
+         │ • Test with SAP Queries        │
+         │ • Compare Pre vs Fine-tuned    │
+         │ • Validate Accuracy            │
+         │ • Measure Performance          │
+         └────────────────────────────────┘
+                          │
+                          ▼
+┌──────────────────┐
+│  PHASE 8         │
+│  Production &    │──────┐
+│  Monitoring      │      │
+└──────────────────┘      │
+                          ▼
+         ┌────────────────────────────────┐
+         │ • Integrate with Applications  │
+         │ • Monitor Token Usage          │
+         │ • Track Model Performance      │
+         │ • Iterate & Improve            │
+         └────────────────────────────────┘
+```
+
+### Data Flow Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         DATA FLOW DIAGRAM                            │
+└─────────────────────────────────────────────────────────────────────┘
+
+   SAP Finance          Data                  Azure AI
+   Knowledge         Preparation              Foundry
+      │                   │                       │
+      │                   │                       │
+      ▼                   ▼                       ▼
+┌──────────┐      ┌──────────────┐      ┌─────────────────┐
+│ SAP FI/CO│      │              │      │  Fine-Tuning    │
+│ Experts  │─────▶│  JSONL Files │─────▶│  Pipeline       │
+│          │      │              │      │                 │
+│ • FB01   │      │ Training:    │      │ ┌─────────────┐ │
+│ • MIRO   │      │ 50 examples  │      │ │ Base Model  │ │
+│ • FB60   │      │              │      │ │ GPT-4o-mini │ │
+│ • GL Acc │      │ Validation:  │      │ └──────┬──────┘ │
+└──────────┘      │ 10 examples  │      │        │        │
+                  └──────────────┘      │        ▼        │
+                                        │ ┌─────────────┐ │
+                                        │ │    LoRA     │ │
+                                        │ │ Adaptation  │ │
+                                        │ └──────┬──────┘ │
+                                        │        │        │
+                                        │        ▼        │
+                                        │ ┌─────────────┐ │
+                                        │ │Fine-Tuned   │ │
+                                        │ │SAP Finance  │ │
+                                        │ │   Model     │ │
+                                        │ └──────┬──────┘ │
+                                        └────────┼────────┘
+                                                 │
+                                                 ▼
+                                        ┌─────────────────┐
+                                        │   Deployment    │
+                                        │                 │
+                                        │ • API Endpoint  │
+                                        │ • Serverless    │
+                                        │ • Auto-Scaling  │
+                                        └────────┬────────┘
+                                                 │
+                                                 ▼
+                           ┌─────────────────────┴─────────────────────┐
+                           │                                           │
+                           ▼                                           ▼
+                    ┌─────────────┐                            ┌─────────────┐
+                    │ SAP Fiori   │                            │  Custom     │
+                    │ Applications│                            │  Apps       │
+                    └─────────────┘                            └─────────────┘
+```
+
+### Training Lifecycle
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   TRAINING LIFECYCLE                         │
+└─────────────────────────────────────────────────────────────┘
+
+1. INITIALIZATION
+   │
+   ├─▶ Load Base Model (GPT-4o-mini)
+   ├─▶ Initialize LoRA Layers
+   └─▶ Load Training Data
+
+2. TRAINING LOOP (Per Epoch)
+   │
+   ├─▶ Forward Pass
+   │   ├─▶ Input: SAP Finance Query
+   │   ├─▶ Model Processing
+   │   └─▶ Output: Predicted Response
+   │
+   ├─▶ Loss Calculation
+   │   └─▶ Compare with Expected SAP Answer
+   │
+   ├─▶ Backward Pass
+   │   └─▶ Update LoRA Parameters Only
+   │
+   └─▶ Validation Check
+       ├─▶ Test on Validation Set
+       └─▶ Monitor for Overfitting
+
+3. COMPLETION
+   │
+   ├─▶ Save Fine-Tuned Model
+   ├─▶ Generate Performance Metrics
+   └─▶ Prepare for Deployment
+```
+
+### Screenshot Placeholders
+
+Below are the key steps where screenshots would be helpful for visual guidance:
+
+#### Step 1: Azure AI Foundry Portal - Project Creation
+![Azure AI Foundry Project Creation](./images/01-foundry-project-creation.png)
+*Create a new project in Azure AI Foundry portal*
+
+#### Step 2: Fine-Tuning Model Selection
+![Select Base Model](./images/02-model-selection.png)
+*Select GPT-4o-mini-2024-07-18 as base model*
+
+#### Step 3: Upload Training Data
+![Upload Training Data](./images/03-upload-training-data.png)
+*Upload sap_finance_training.jsonl file*
+
+#### Step 4: Configure Hyperparameters
+![Configure Training Parameters](./images/04-configure-parameters.png)
+*Set epochs, batch size, and learning rate*
+
+#### Step 5: Monitor Training Progress
+![Training Progress](./images/05-training-progress.png)
+*Monitor training and validation loss curves*
+
+#### Step 6: Deploy Fine-Tuned Model
+![Model Deployment](./images/06-model-deployment.png)
+*Deploy the fine-tuned model to serverless endpoint*
+
+#### Step 7: Test the Model
+![Test Model](./images/07-test-model.png)
+*Test with SAP Finance queries in the playground*
+
+> **Note**: Image files should be placed in an `images/` directory at the root of this repository. The filenames follow the convention: `##-descriptive-name.png`
+
+### Workflow Decision Points
+
+```
+                    ┌─────────────────┐
+                    │ Start Fine-Tune │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Have Training   │
+                    │ Data?           │
+                    └────┬──────┬─────┘
+                         │ No   │ Yes
+                         ▼      ▼
+                  ┌──────────┐  │
+                  │ Create   │  │
+                  │ Dataset  │  │
+                  └────┬─────┘  │
+                       │        │
+                       └────────┤
+                                ▼
+                    ┌─────────────────┐
+                    │ Dataset Size    │
+                    │ Adequate?       │
+                    │ (50+ examples)  │
+                    └────┬──────┬─────┘
+                         │ No   │ Yes
+                         ▼      ▼
+                  ┌──────────┐  │
+                  │ Collect  │  │
+                  │ More Data│  │
+                  └────┬─────┘  │
+                       │        │
+                       └────────┤
+                                ▼
+                    ┌─────────────────┐
+                    │ Select Training │
+                    │ Method:         │
+                    │ • SFT (LoRA)    │
+                    │ • DPO (Preview) │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Configure       │
+                    │ Hyperparameters │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Start Training  │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Training        │
+                    │ Successful?     │
+                    └────┬──────┬─────┘
+                         │ No   │ Yes
+                         ▼      ▼
+                  ┌──────────┐  │
+                  │ Adjust   │  │
+                  │ Params & │  │
+                  │ Retry    │  │
+                  └────┬─────┘  │
+                       │        │
+                       └────────┤
+                                ▼
+                    ┌─────────────────┐
+                    │ Deploy Model    │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Test & Validate │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Performance     │
+                    │ Acceptable?     │
+                    └────┬──────┬─────┘
+                         │ No   │ Yes
+                         ▼      ▼
+                  ┌──────────┐  │
+                  │ Iterate: │  │
+                  │ • More   │  │
+                  │   Data   │  │
+                  │ • Adjust │  │
+                  │   Params │  │
+                  └────┬─────┘  │
+                       │        │
+                       └────────┤
+                                ▼
+                    ┌─────────────────┐
+                    │ Production      │
+                    │ Deployment      │
+                    └─────────────────┘
+```
+
+### Key Workflow Principles
+
+#### 1. **Iterative Process**
+Fine-tuning is not a one-time activity. It requires:
+- Continuous evaluation of model performance
+- Regular updates when SAP processes change
+- Retraining when new SAP modules are added
+- Monitoring and improvement based on user feedback
+
+#### 2. **Data Quality Over Quantity**
+- Start with 50-100 **high-quality** examples
+- Focus on diverse SAP scenarios
+- Ensure accurate, expert-validated responses
+- Scale to 500+ examples for production
+
+#### 3. **Training Methods**
+
+| Method | Description | Use Case |
+|--------|-------------|----------|
+| **SFT (Supervised Fine-Tuning)** | Uses LoRA to adapt model with Q&A pairs | Standard approach for SAP Finance domain |
+| **DPO (Direct Preference Optimization)** | Trains on preference pairs (better/worse responses) | Advanced optimization (Preview) |
+| **Distillation** | Transfer knowledge from larger model | Cost optimization |
+
+#### 4. **Monitoring Metrics**
+
+Track these metrics throughout the workflow:
+
+```
+┌─────────────────────────────────────────────────────┐
+│              KEY PERFORMANCE METRICS                 │
+├─────────────────────────────────────────────────────┤
+│                                                      │
+│  Training Phase:                                     │
+│  • Training Loss          ↓ (should decrease)        │
+│  • Validation Loss        ↓ (should decrease)        │
+│  • Overfitting Check      → (train vs validation)    │
+│                                                      │
+│  Deployment Phase:                                   │
+│  • Response Accuracy      ↑ (compared to baseline)   │
+│  • Latency               → (target: < 2s)            │
+│  • Token Usage           → (monitor costs)           │
+│  • Error Rate            ↓ (hallucinations)          │
+│                                                      │
+│  Production Phase:                                   │
+│  • User Satisfaction     ↑ (feedback scores)         │
+│  • Query Success Rate    ↑ (% resolved queries)      │
+│  • Cost per Query        → (ROI tracking)            │
+│                                                      │
+└─────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -264,6 +670,36 @@ Fine-tuning and deploying a custom model incur additional costs on Azure. Here's
 **The Azure AI Foundry SAP Finance AI Assistant is live and ready to answer your team's SAP questions!**
 
 Ready to demo Azure AI Foundry fine-tuning with SAP expertise!
+
+---
+
+## References & Resources
+
+### Official Microsoft Documentation
+
+- [Fine-tune models with Azure AI Foundry](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/fine-tuning-overview)
+- [Customize a model with Microsoft Foundry fine-tuning](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/fine-tuning)
+- [Deploy Fine-Tuned Models with Serverless API](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/fine-tune-serverless)
+- [Microsoft Foundry Fine-tuning Considerations](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/concepts/fine-tuning-considerations)
+
+### Learning Resources
+
+- [Fine-tune a language model - Microsoft Learn Lab](https://microsoftlearning.github.io/mslearn-ai-studio/Instructions/05-Finetune-model.html)
+- [The Developer's Guide to Smarter Fine-tuning](https://devblogs.microsoft.com/foundry/the-developers-guide-to-smarter-fine-tuning/)
+- [Azure AI Foundry Blog - Fine-tuning Announcements](https://azure.microsoft.com/en-us/blog/announcing-new-fine-tuning-models-and-techniques-in-azure-ai-foundry/)
+
+### GitHub Resources
+
+- [Azure AI Foundry Fine-tuning Examples](https://github.com/azure-ai-foundry/fine-tuning)
+
+### Training Data Format
+
+Training data must be in JSONL (JSON Lines) format with conversational structure:
+
+```jsonl
+{"messages": [{"role": "system", "content": "You are an SAP Finance expert."}, {"role": "user", "content": "What is FB01?"}, {"role": "assistant", "content": "FB01 is used to post general accounting documents in SAP FI..."}]}
+{"messages": [{"role": "system", "content": "You are an SAP Finance expert."}, {"role": "user", "content": "How do I post a vendor invoice?"}, {"role": "assistant", "content": "Use FB60 for non-PO invoices or MIRO for PO-based invoices..."}]}
+```
 
 ---
 
