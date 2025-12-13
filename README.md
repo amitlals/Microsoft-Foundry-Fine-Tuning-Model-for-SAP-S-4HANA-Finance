@@ -263,39 +263,119 @@ A fine-tuned model that:
    └─▶ Prepare for Deployment
 ```
 
-### Screenshot Placeholders
+### Visual Guide & Portal Screenshots
 
-Below are the key steps where screenshots would be helpful for visual guidance:
+For detailed visual walkthroughs with actual Azure AI Foundry portal screenshots, refer to the official Microsoft Learn documentation:
 
-#### Step 1: Azure AI Foundry Portal - Project Creation
-![Azure AI Foundry Project Creation](./images/01-foundry-project-creation.png)
-*Create a new project in Azure AI Foundry portal*
+#### 📖 Official Screenshot Resources
 
-#### Step 2: Fine-Tuning Model Selection
-![Select Base Model](./images/02-model-selection.png)
-*Select GPT-4o-mini-2024-07-18 as base model*
+| Step | Description | Official Documentation Link |
+|------|-------------|----------------------------|
+| **1. Portal Setup** | Create Azure AI Foundry Hub and Project | [What is Azure AI Foundry?](https://learn.microsoft.com/en-us/azure/ai-foundry/what-is-azure-ai-foundry) |
+| **2. Fine-Tuning Setup** | Access Fine-tuning section and select model | [Customize a model with fine-tuning](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/fine-tuning) |
+| **3. Data Upload** | Upload training and validation JSONL files | [Fine-tune GPT-4o-mini Tutorial](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/tutorials/fine-tune) |
+| **4. Configure Training** | Set epochs, batch size, learning rate | [Fine-tuning Overview - Training Configuration](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/fine-tuning-overview) |
+| **5. Monitor Training** | View training metrics and loss curves | [Customize a model - Monitor Training](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/fine-tuning#monitor-your-fine-tuned-model) |
+| **6. Deploy Model** | Deploy to serverless or managed compute | [Deploy Fine-Tuned Models (Serverless)](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/fine-tune-serverless) |
+| **7. Test & Validate** | Test model in Playground or via API | [Fine-tune a language model - Lab Exercise](https://microsoftlearning.github.io/mslearn-ai-studio/Instructions/05-Finetune-model.html) |
 
-#### Step 3: Upload Training Data
-![Upload Training Data](./images/03-upload-training-data.png)
-*Upload sap_finance_training.jsonl file*
+#### 🎨 Interactive Visual Flow (Mermaid Diagram)
 
-#### Step 4: Configure Hyperparameters
-![Configure Training Parameters](./images/04-configure-parameters.png)
-*Set epochs, batch size, and learning rate*
+```mermaid
+graph TB
+    Start([Start Fine-Tuning]) --> Portal[Navigate to Azure AI Foundry Portal]
+    Portal --> CreateProject[Create Hub & Project]
+    CreateProject --> SelectFT[Select Fine-tuning from Sidebar]
+    SelectFT --> ChooseModel[Choose Base Model: GPT-4o-mini]
+    ChooseModel --> UploadData[Upload Training Data JSONL]
+    UploadData --> UploadValidation[Upload Validation Data Optional]
+    UploadValidation --> ConfigParams[Configure Hyperparameters]
+    ConfigParams --> StartTrain[Start Training Job]
+    StartTrain --> Monitor[Monitor Training Progress]
+    Monitor --> CheckStatus{Training<br/>Successful?}
+    CheckStatus -->|No| Troubleshoot[Troubleshoot & Adjust]
+    Troubleshoot --> ConfigParams
+    CheckStatus -->|Yes| Deploy[Deploy Model]
+    Deploy --> Test[Test in Playground]
+    Test --> Validate{Performance<br/>Acceptable?}
+    Validate -->|No| Iterate[Collect More Data]
+    Iterate --> UploadData
+    Validate -->|Yes| Production[Production Deployment]
+    Production --> End([Complete])
 
-#### Step 5: Monitor Training Progress
-![Training Progress](./images/05-training-progress.png)
-*Monitor training and validation loss curves*
+    style Start fill:#e1f5e1
+    style End fill:#e1f5e1
+    style CheckStatus fill:#fff4e1
+    style Validate fill:#fff4e1
+    style Production fill:#e1e5ff
+```
 
-#### Step 6: Deploy Fine-Tuned Model
-![Model Deployment](./images/06-model-deployment.png)
-*Deploy the fine-tuned model to serverless endpoint*
+#### 📸 Portal Navigation Quick Reference
 
-#### Step 7: Test the Model
-![Test Model](./images/07-test-model.png)
-*Test with SAP Finance queries in the playground*
+**Step-by-Step Portal Navigation:**
 
-> **Note**: Image files should be placed in an `images/` directory at the root of this repository. The filenames follow the convention: `##-descriptive-name.png`
+1. **Access Azure AI Foundry Portal**
+   ```
+   🌐 Navigate to: https://ai.azure.com
+   📂 Sign in with your Azure credentials
+   ```
+
+2. **Create or Select Project**
+   ```
+   ➕ Home → "Create new project" or select existing project
+   🏷️  Name: e.g., "SAP-Finance-Fine-Tuning"
+   📍 Region: East US 2, Sweden Central, or North Central US
+   ```
+
+3. **Fine-Tuning Section**
+   ```
+   📋 Left Sidebar → "Fine-tuning"
+   🆕 Click "+ Fine-tune model"
+   🤖 Base models → Select "gpt-4o-mini-2024-07-18"
+   ```
+
+4. **Upload Training Data**
+   ```
+   📤 Training data → Upload file
+   📄 Select: sap_finance_training.jsonl
+   ✅ Validation data → Upload: sap_finance_validation.jsonl (optional)
+   ```
+
+5. **Configure Training Job**
+   ```
+   ⚙️  Training method: Supervised Fine-Tuning (SFT) with LoRA
+   🔢 Epochs: 3-5 (start with 3)
+   📊 Batch size: Auto
+   📈 Learning rate: Auto or 0.1
+   🏷️  Model suffix: "sap-finance-demo"
+   ```
+
+6. **Monitor Training**
+   ```
+   📊 Status: Pending → Running → Succeeded
+   📉 Training loss curve (should decrease)
+   📉 Validation loss curve (should decrease)
+   ⏱️  Expected duration: 15-45 minutes
+   ```
+
+7. **Deploy Model**
+   ```
+   🚀 Click "Deploy" from training job summary
+   🏷️  Deployment name: "sap-finance-assistant"
+   💪 Capacity: 1 TPM (for demo), scale as needed
+   ⏱️  Deployment time: ~5 minutes
+   ```
+
+8. **Test in Playground**
+   ```
+   🧪 Navigate to deployed model
+   💬 Test with SAP queries:
+      - "What is FB01 used for?"
+      - "How do I post a vendor invoice in SAP?"
+   ✅ Validate responses against expected behavior
+   ```
+
+> **💡 Pro Tip**: For the most current portal screenshots and UI updates, always refer to the [official Microsoft Learn documentation](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/fine-tuning) as the Azure AI Foundry interface is regularly updated.
 
 ### Workflow Decision Points
 
