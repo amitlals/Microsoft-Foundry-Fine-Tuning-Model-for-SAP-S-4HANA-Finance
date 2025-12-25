@@ -23,7 +23,11 @@
 
 ## Executive Summary
 
-This demo showcases how to fine-tune a GPT-4o-mini model using Microsoft Foundry's portal-based (no-code) interface with an SAP Finance-specific dataset. The fine-tuned model will understand SAP FI/CO terminology, transaction codes, and provide domain-specific responses for financial operations.
+This demo showcases how to fine-tune a GPT-4o-mini model using Microsoft Foundry's portal-based (no-code) interface with an SAP Finance-specific dataset. The fine-tuned model will understand SAP FI/CO terminology, transaction codes, and provide domain-specific responses for financial operations. Ready to use with API Endpoint!
+
+<img width="1013" height="481" alt="image" src="https://github.com/user-attachments/assets/221b66f2-b706-41c4-ab6a-90731e9992a2" />
+
+
 
 ### SAP Finance AI Agent Powered by Fine-tuned LLM
 
